@@ -7,7 +7,7 @@ UI for serving a directory of files using compression. Double click files and fo
 
 ### Install
 ```bash
-npm install -g @rockz/share
+npm install -g @rockz/serve
 ```
 
 ### Usage
@@ -17,5 +17,5 @@ share  # serve all subfolders from working directory
 
 ### Uninstall
 ```bash
-npm remove -g @rockz/share
+npm remove -g @rockz/serve
 ```
