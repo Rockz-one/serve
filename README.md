@@ -19,3 +19,14 @@ serve  # serve all subfolders from working directory
 ```bash
 npm remove -g @rockz/serve
 ```
+
+### CLI 
+```bash
+Usage: serve [options]
+
+Serve files with a nice ui. Single click to navigate, double click for a zip
+
+Options:
+  -p, --port <int>
+  -h, --help        display help for command
+```

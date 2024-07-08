@@ -1,6 +1,6 @@
 {
   "name": "@rockz/serve",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "UI for serving a directory of files using compression. Double click files and folders for the zip version",
   "repository": {
     "type": "git",

@@ -2,11 +2,11 @@
 const compression                 = require('compression')
 const express                     = require('express')
 const { promises: fs, constants } = require("fs")
+const {existsSync, lstatSync}     = require("fs")
 const path                        = require('path')
 const archiver                    = require('archiver')
 const { program }                 = require('commander')
 const moment                      = require('moment')
-
 
 // Parse Flags and args
 program
@@ -14,8 +14,9 @@ program
   .argument('[file path]')
   .option('-p, --port <int>')
 program.parse()
-const options = program.opts()
-const args    = program.args
+const options  = program.opts()
+const filepath = program.args // # TODO
+let port       = options.port ?  Number(options.port) : 8000
 
 const app = express()
 app.use(compression())
@@ -29,10 +30,10 @@ app.use((req, res, next) => {
   })
   next()
 })
-let port  = 8000
 
 
-const foo = "<a href='/'><h>Path not found, click here to route back to root directory</h></a>"
+
+const notFound = "<a href='/'><h>Path not found, click here to route back to root directory</h></a>"
 
 let starthtml = `<!DOCTYPE html>
 <html>
@@ -171,7 +172,7 @@ app.get('*.zip', async (req,res)=>{
         archive.file(currentPathNoZip, { name: folderName }).finalize()
       }
     }else{
-      res.sendStatus(404).send(foo)
+      res.sendStatus(404).send(notFound)
     }
   }
 })
@@ -225,12 +226,12 @@ app.get('*', async (req,res)=>{
             res.sendFile(currentPath, {dotfiles:'allow'})
         }
     }else{
-      res.sendStatus(404).send(foo)
+      res.sendStatus(404).send(notFound)
     }
 })
 
 app.all("*", (req,res)=>{
-  res.sendStatus(404).send(foo)
+  res.sendStatus(404).send(notFound)
 })
 
 app.listen(port, ()=>{
