@@ -19,10 +19,20 @@ const args    = program.args
 
 const app = express()
 app.use(compression())
+app.use((req, res, next) => {
+  res.on('finish', async () => {
+    // Log request
+    let day    = moment().format('D/MMM/Y h:m:sa')
+    let method = req.method + ` ${req.path}`
+    let status = res.statusCode 
+    console.log(`[${day}] ${method} ${status}`)
+  })
+  next()
+})
 let port  = 8000
 
 
-const notFound = "<a href="/"><h>Path not found, click here to route back to root directory</h></a>"
+const foo = "<a href='/'><h>Path not found, click here to route back to root directory</h></a>"
 
 let starthtml = `<!DOCTYPE html>
 <html>
@@ -161,15 +171,9 @@ app.get('*.zip', async (req,res)=>{
         archive.file(currentPathNoZip, { name: folderName }).finalize()
       }
     }else{
-      res.sendStatus(404).send(notFound)
+      res.sendStatus(404).send(foo)
     }
   }
-
-  // Log request
-  let day    = moment().format('D/MMM/Y h:m:sa')
-  let method = req.method + ` ${req.path}`
-  let status = res.statusCode 
-  console.log(`[${day}] ${method} ${status}`)
 })
 
 app.get('*', async (req,res)=>{
@@ -221,24 +225,12 @@ app.get('*', async (req,res)=>{
             res.sendFile(currentPath, {dotfiles:'allow'})
         }
     }else{
-      res.sendStatus(404).send(notFound)
+      res.sendStatus(404).send(foo)
     }
-
-    // Log request
-    let day    = moment().format('D/MMM/Y h:m:sa')
-    let method = req.method + ` ${req.path}`
-    let status = res.statusCode 
-    console.log(`[${day}] ${method} ${status}`)
 })
 
 app.all("*", (req,res)=>{
-  res.sendStatus(404).send(notFound)
-
-  // Log request
-  let day    = moment().format('D/MMM/Y h:m:sa')
-  let method = req.method + ` ${req.path}`
-  let status = res.statusCode 
-  console.log(`[${day}] ${method} ${status}`)
+  res.sendStatus(404).send(foo)
 })
 
 app.listen(port, ()=>{
