@@ -12,7 +12,7 @@ npm install -g @rockz/serve
 
 ### Usage
 ```bash
-share  # serve all subfolders from working directory
+serve  # serve all subfolders from working directory
 ```
 
 ### Uninstall
