@@ -1,4 +1,4 @@
-# @rockz/share
+# @rockz/serve
 UI for serving a directory of files using compression. Double click files and folders for the zip version
 
 <p align="center">
