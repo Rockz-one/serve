@@ -1,5 +1,5 @@
 # @rockz/serve
-UI for serving a directory of files using compression. Double click files and folders for the zip version
+Http file server with compression. Double click files and folders for the zip version. Feel free to leave suggestions on [github](https://github.com/Rockz-one/serve/issues/1)
 
 <p align="center">
     <img width="50%" src="tests/example.png"/>
