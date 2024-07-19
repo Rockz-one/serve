@@ -2,7 +2,7 @@
 Http file server with compression. Double click files and folders for the zip version. Feel free to leave suggestions on [github](https://github.com/Rockz-one/serve/issues/1)
 
 <p align="center">
-    <img width="50%" src="tests/example.png"/>
+    <img width="75%" src="tests/example.png"/>
 </p>
 
 ### Install
