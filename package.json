@@ -1,6 +1,6 @@
 {
   "name": "@rockz/serve",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Http file server with compression. Double click files and folders for the zip version",
   "repository": {
     "type": "git",
