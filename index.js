@@ -54,10 +54,18 @@ let starthtml = `<!DOCTYPE html>
 }
 :root{
     --bg-color : whitesmoke;
+    --font-color : #22728D;
 }
-@media (prefers-color-scheme: dark) {
+// @media (prefers-color-scheme: dark) {
+//   :root{
+//     --bg-color : #1E1E1F;
+//     --font-color : whitesmoke;
+//    }
+// }
+@media (prefers-color-scheme: light) {
   :root{
     --bg-color : whitesmoke;
+    --font-color : #22728D;
    }
 }
 html,body{
@@ -104,7 +112,7 @@ html,body{
     word-break: break-all;
 }
 a{
-    color: #22728D;
+    color: var(--font-color);
     text-decoration: none;
 }
 a:hover{
