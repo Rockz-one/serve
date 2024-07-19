@@ -36,6 +36,7 @@
     "serve",
     "file",
     "compression",
-    "http-server"
+    "http-server",
+    "zip"
   ]
 }
