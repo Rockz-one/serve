@@ -142,6 +142,33 @@ function goto(url) {
 let endhtml = `
 </div>
 </div>
+<script>
+  function sortGrid(){
+    console.log('here')
+    const gridItems = document.getElementById("contents").children
+    const gridList  = [].slice.call(gridItems)
+
+    function sortFunction(gridItemA, gridItemB){
+      const AisDir       = String(gridItemA.getAttribute('isdir')).toLowerCase() === "true"
+      const nameA        = gridItemA.getAttribute('name')
+      const BisDir       = String(gridItemB.getAttribute('isdir')).toLowerCase() === "true"
+      const nameB        = gridItemB.getAttribute('name')
+      if ((AisDir && BisDir) || !AisDir && !BisDir){
+        console.log("aDir",AisDir, "bDir", BisDir, nameA.localeCompare(nameB, undefined, { numeric: true }))
+        return nameA.localeCompare(nameB, undefined, { numeric: true })
+      }else if(AisDir && !BisDir){
+        return -1
+      }else { // !AisDir && BisDir
+        return 1
+      }
+    }
+    gridList.sort(sortFunction)
+    const gridContainer = document.getElementById("contents")
+    gridContainer.innerHTML = ""
+    gridList.forEach(grid => gridContainer.innerHTML += grid.outerHTML)
+  }
+  new Promise(res=>setTimeout(res,2000)).then(sortGrid())
+</script>
 </body>
 </html>
 `
@@ -199,6 +226,7 @@ app.get('*', async (req,res)=>{
         const pathStats = await fs.lstat(currentPath)
         if(pathStats.isDirectory()){
             const contents = await fs.readdir(currentPath)
+
             // Breadcrumbs
             let   formattedContent  = `<span style="font-size:18px;"><a href="/">/</a><span> </span>`
             let   base              = ""
@@ -216,7 +244,7 @@ app.get('*', async (req,res)=>{
             formattedContent+="</span>"
 
             // List files and directories
-            formattedContent+='<div class="grid">'
+            formattedContent+='<div id="contents" class="grid">'
             for (i=0; i<contents.length; i++){
                 const listing = path.join(currentPath, contents[i])
                 const subPathStats = await fs.lstat(listing)
@@ -228,13 +256,13 @@ app.get('*', async (req,res)=>{
                     name = name.slice(0,19) + '...' + name.slice(-8)
                  }
                 if (isDir){
-                  formattedContent+=`<a onclick="goto('${link}')" ondblclick="dlzip('${link}.zip')" class="grid-item" title="Double click for zip">
+                  formattedContent+=`<a isdir="true" name="${name}" onclick="goto('${link}')" ondblclick="dlzip('${link}.zip')" class="grid-item" title="Double click for zip">
                     <img height="115px" width="180px" src="/@rockz/serve/folder.png"/>
                     <span>${name}</span>
                     </a>
                     `
                 }else{
-                  formattedContent+=`<a onclick="goto('${link}')" ondblclick="dlzip('${link}.zip')" class="grid-item" title="Double click for zip">
+                  formattedContent+=`<a isdir="false" name="${name}" onclick="goto('${link}')" ondblclick="dlzip('${link}.zip')" class="grid-item" title="Double click for zip">
                     <img style="padding-right:30px;padding-left:30px;" height="115px" width="180px" src="/@rockz/serve/file.png"/>
                     <span>${name}</span>
                     </a>
