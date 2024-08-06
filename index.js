@@ -374,7 +374,7 @@ async function forwardIfSet(){
         sshClient.connect({
           type      : "publickey",
           host      : fwdServer,
-          username  : "",      // only works for localhost.run if this is nokey
+          username  : "nokey",      // only works for localhost.run if this is nokey
           privateKey: key
         })
       }else{
