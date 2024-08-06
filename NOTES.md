@@ -11,3 +11,11 @@ $ curl http://localhost:8000 --silent -H "Accept-Encoding: gzip,deflate" --write
 
 1857
 ```
+
+## Ideas
+- [ ] Amertize directory stats
+- [ ] Make tests
+- [ ] Plot tests
+
+## Look into compression with files
+- [https://github.com/expressjs/compression/issues/35](https://github.com/expressjs/compression/issues/35)
