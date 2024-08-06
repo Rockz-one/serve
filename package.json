@@ -1,12 +1,12 @@
 {
   "name": "@rockz/serve",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Http file server with compression. Double click files and folders for the zip version",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Rockz-one/serve.git"
   },
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "serve": "node index.js"
   },
@@ -27,7 +27,7 @@
   "files": [
     "index.js",
     "tst/",
-    "src/"
+    "img/"
   ],
   "engines": {
     "node": ">=8"
