@@ -64,6 +64,8 @@ const notFound = "<a href='/'><h>Path not found, click here to route back to roo
 let starthtml = `<!DOCTYPE html>
 <html>
 <head>
+<link rel="icon" type="image/webp" href="/@rockz/serve/file.webp">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
@@ -109,6 +111,8 @@ html,body{
   margin: 0;
   padding: 10px;
   top:0;
+  touch-action: pan-x pan-y;
+  touch-action: manipulation;
 }
 @media only screen and (max-width: 600px) {
   html,body {
@@ -162,15 +166,32 @@ function dlzip(url) {
 function goto(url) {
   setTimeout(()=>{
     if(!dblClicked){
-        window.open(url, "_self")
+      window.open(url, "_self")
     }
   },50)
 }
 </script>
 `
+// <Script>var directory=[{isdir: isDir, href: link, name: name}] gets added to the following
 let endhtml = `
 
   async function render(){
+    function sortFunction(itemA, itemB){
+      const AisDir       = itemA.isdir
+      const nameA        = itemA.name
+      const BisDir       = itemB.isdir
+      const nameB        = itemB.name
+      if ((AisDir && BisDir) || !AisDir && !BisDir){
+        // console.log("aDir",AisDir, "bDir", BisDir, nameA.localeCompare(nameB, undefined, { numeric: true }))
+        return nameA.localeCompare(nameB, undefined, { numeric: true })
+      }else if(AisDir && !BisDir){
+        return -1
+      }else { // !AisDir && BisDir
+        return 1
+      }
+    }
+    directory.sort(sortFunction)
+
     let grid = document.getElementById("contents")
     let html=""
     for (let index=0; index<directory.length; index++){
@@ -215,7 +236,8 @@ let endhtml = `
     gridContainer.innerHTML = ""
     gridList.forEach(grid => gridContainer.innerHTML += grid.outerHTML)
   }
-   new Promise(res=>setTimeout(2000,res)).then(render().then(sortGrid()))
+  //  new Promise(res=>setTimeout(2000,res)).then(render().then(sortGrid()))
+  render()
 </script>
 </body>
 </html>
