@@ -13,24 +13,22 @@ const defualtKeyPath              = path.join(homedir,'.ssh/id_rsa')  // default
 const Client                      = require("ssh2").Client            // ssh frowarding
 const Socket                      = require("net").Socket             // ssh frowarding
 
-//# Todo fix laggy UI
-
 // Parse Flags and args
 program
   .description('Serve files with a nice ui. single click to navigate, double click for a zip')
   // .argument('[file path]')
   .option('-p, --port <int>')
-  .option('-f, --forward [domain]', 'domain of ssh forwading server')
+  .option('-f, --forward [domain]', 'domain of ssh forwarding server (ex. localhost.run, rockz.one)')
   .option('-d, --domain <domain>', 'domain of desired url')
   .option('-k, --key <path>','private key path for forwarding agent')
-  .option('-l, --lock <password>','password to enable access')
+  // .option('-l, --lock <password>','password to enable access')
 
 program.parse()
-const options           = program.opts()
-const folderToServe     = program.args           // # TODO
-let port                = options.port          ?  Number(options.port) : 8000
-let fwdServer           = options.forward!=true ?  options.forward : "rockz.one"
-let requestedDomain     = options.domain        ?  options.domain : "localhost"
+const options             = program.opts()
+const folderToServe       = program.args                                                 // # TODO
+const port                = options.port          ?  Number(options.port) : 8000
+const fwdServer           = options.forward!=true ?  options.forward      : "rockz.one"
+const requestedDomain     = options.domain        ?  options.domain       : "localhost"
 let key                 = ""
 if (options.key){
   if (existsSync(options.key)){
@@ -40,7 +38,7 @@ if (options.key){
   key = readFileSync(defualtKeyPath).toString()
 }
 
-// Make app and define what happens before the main logic of each route
+// Define what happens before the main logic of each route
 const app = express()
 app.disable('etag')
 app.use(compression({ threshold: 0 }))
@@ -61,7 +59,7 @@ app.use((req, res, next) => {
   next()
 })
 
-// HTML wrapper for UI
+// HTML template for UI
 const notFound = "<a href='/'><h>Path not found, click here to route back to root directory</h></a>"
 let starthtml = `<!DOCTYPE html>
 <html>
@@ -223,7 +221,7 @@ let endhtml = `
 </html>
 `
 
-// Icons
+// Serve icons
 app.get('/@rockz/serve/folder.webp',(req,res)=>{
   res.sendFile(__dirname+'/img/folder.webp')
 })
@@ -231,7 +229,7 @@ app.get('/@rockz/serve/file.webp',(req,res)=>{
   res.sendFile(__dirname+'/img/file.webp')
 })
 
-// Any path with a zip
+// Handle any route with a zip
 app.get('*.zip', async (req,res)=>{
   const parsedReqPath        = decodeURIComponent(req.path)
   const withoutZip           = parsedReqPath.replace(/.zip$/,"")
@@ -266,7 +264,7 @@ app.get('*.zip', async (req,res)=>{
   }
 })
 
-// Any non-zip path
+// Handle any non-zip route 
 app.get('*', async (req,res)=>{
     const parsedReqPath = decodeURIComponent(req.path)
     const currentPath   = path.join(process.env.PWD, parsedReqPath)
@@ -318,11 +316,6 @@ app.get('*', async (req,res)=>{
     }
 })
 
-// Any other get requests
-app.get("*", (req,res)=>{
-  res.status(404).send(notFound)
-})
-
 // Start the server
 app.listen(port, ()=>{
   console.log(`Serving HTTP on 0.0.0.0 port ${port} (http://0.0.0.0:${port}/) ...`)
@@ -340,58 +333,70 @@ async function forwardIfSet(){
       localPort : port,
     }
     
-    sshClient
-      .on("ready", () => {
-        // Log stuff from the server
-        sshClient.shell((err, stream) => {
-          if (err) throw err
-          stream.on("data", data => {console.log(data.toString())})
-        })
-        // Request port forwarding from the remote server
-        sshClient.forwardIn(config.remoteHost, config.remotePort, (err, forwardPort) => {
-          if (err) throw err;
-          sshClient.emit("forward-in", forwardPort)
-        })
+    // When connected request a termnial and a forwarding session
+    sshClient.on("ready", () => {
+      // Log stuff from the server
+      sshClient.shell((err, stream) => {
+        if (err) throw err
+        stream.on("data", data => {console.log(data.toString())})
       })
+      // Request port forwarding from the remote server
+      sshClient.forwardIn(config.remoteHost, config.remotePort, (err, forwardPort) => {
+        if (err) throw err;
+        sshClient.emit("forward-in", forwardPort)
+      })
+    })
 
-      // On port forwarding request accepted, handle new connections, why 443 work but not 80 on fwd?
-      .on("tcp connection", (info, accept, reject) => {
-        let remote;
-        const srcSocket = new Socket()
-        srcSocket
-          .on("error", err => {
-            if (remote === undefined) reject()
-            else remote.end()
-          })
-          .connect(config.localPort, config.localPort, () => {
-            remote = accept()
-            srcSocket.pipe(remote).pipe(srcSocket)
-          })
-      })
-      
-      // Use ssh key or password 
-      if (key){
-        sshClient.connect({
-          type      : "publickey",
-          host      : fwdServer,
-          username  : "nokey",      // only works for localhost.run if this is nokey
-          privateKey: key
+    // On port forwarding request accepted, handle new connections
+    sshClient.on("tcp connection", (info, accept, reject) => {
+      let remote;
+      const srcSocket = new Socket()
+      srcSocket
+        .on("error", err => {
+          if (remote === undefined) reject()
+          else remote.end()
         })
-      }else{
-        sshClient.connect({
-          type     : "password",
-          host     : fwdServer,
-          username : "nokey",
-          password : ""
+        .connect(config.localPort, config.localPort, () => {
+          remote = accept()
+          srcSocket.pipe(remote).pipe(srcSocket)
         })
+    })
+    
+    // Connect with ssh key or just with username
+    sshClient.connect({
+      host        : fwdServer,
+      port        : 22,
+      username    : "nokey",
+      authHandler : function(methodsLeft, partialSuccess, doNextAuth){
+        let authConfig = {}
+        if (key){
+          authConfig={
+            type      : "publickey",
+            host      : fwdServer,
+            username  : "nokey",     
+            key       : key
+          }
+        }else{
+          authConfig = {
+            type     : "none",
+            host      : fwdServer,
+            username  : "nokey"
+          }
+        }
+        doNextAuth(authConfig)
       }
+    })
 
+    // When there's an error connecting let the us know
     sshClient.on("error", (err) => {
-      console.log("Something in forwarding configuration is not quite right...")
-      console.log(config)
+      if (err.code == 'ECONNREFUSED'){
+        console.log(`Failed to connect to ${fwdServer}...`)
+      }
+      // console.log(config)
       process.exit()
     })
-    .on("close", (info) => {
+    // Let us know when the forwarding session ends, then shutdown this server
+    sshClient.on("close", (info) => {
       console.log("Forwarding session ended, exiting...")
       sshClient.end()
       process.exit()
@@ -399,11 +404,5 @@ async function forwardIfSet(){
   }
 }
 
+// Forward the connection if requested
 forwardIfSet()
-/* Timing Test
-            let started=moment().unix()
-            console.log("reading", started)
-            // timing to measure
-            let done = moment().unix()
-            console.log("read", done, "total =",done-started, "seconds")
-*/

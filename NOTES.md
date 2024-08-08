@@ -19,3 +19,13 @@ $ curl http://localhost:8000 --silent -H "Accept-Encoding: gzip,deflate" --write
 
 ## Look into compression with files
 - [https://github.com/expressjs/compression/issues/35](https://github.com/expressjs/compression/issues/35)
+
+```javascript
+/* Timing Test
+            let started=moment().unix()
+            console.log("reading", started)
+            // timing to measure
+            let done = moment().unix()
+            console.log("read", done, "total =",done-started, "seconds")
+*/
+```
